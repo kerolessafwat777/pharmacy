@@ -1,0 +1,77 @@
+<odoo>
+    <!-- Form View للروشتة -->
+    <record id="view_prescription_form" model="ir.ui.view">
+        <field name="name">prescription.form</field>
+        <field name="model">prescription</field>
+        <field name="arch" type="xml">
+            <form string="Prescription">
+                <header>
+                    <button name="action_confirmed" string="Confirm" type="object" class="btn-primary" invisible="status != 'draft'"/>
+                    <button name="action_delivered" string="Deliver" type="object" class="btn-success" invisible="status != 'confirmed'"/>
+                    <button name="action_draft" string="Set to Draft" type="object" invisible="status == 'draft'"/>
+                    <field name="status" widget="statusbar" statusbar_visible="draft,confirmed,delivered"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="patient_id"/>
+                            <field name="doctor_id"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Medicines">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="batch_number"/>
+                                    <field name="quantity"/>
+                                    <field name="price_unit"/>
+                                    <field name="price_subtotal"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer oe_right">
+                                <field name="total_amount"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- List View للروشتة -->
+    <record id="view_prescription_tree" model="ir.ui.view">
+        <field name="name">prescription.tree</field>
+        <field name="model">prescription</field>
+        <field name="arch" type="xml">
+            <list string="Prescriptions">
+                <field name="name"/>
+                <field name="patient_id"/>
+                <field name="doctor_id"/>
+                <field name="date"/>
+                <field name="total_amount"/>
+                <field name="status"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action الروشتة -->
+    <record id="action_pharmacy_prescription" model="ir.actions.act_window">
+        <field name="name">Prescriptions</field>
+        <field name="res_model">prescription</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menu Item للروشتة -->
+    <menuitem id="menu_pharmacy_prescription_item"
+              name="Prescriptions"
+              parent="Al_Shifa_pharmacy_root_menu"
+              action="action_pharmacy_prescription"
+              sequence="2"/>
+</odoo>

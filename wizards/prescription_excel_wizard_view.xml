@@ -1,0 +1,45 @@
+<odoo>
+    <data>
+        <!-- Form View للـ Wizard -->
+        <record id="view_prescription_excel_wizard_form" model="ir.ui.view">
+            <field name="name">prescription.excel.wizard.form</field>
+            <field name="model">prescription.excel.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Export Monthly Excel Report">
+                    <group invisible="not excel_file">
+                        <field name="file_name" invisible="1"/>
+                        <field name="excel_file" filename="file_name" widget="binary"/>
+                    </group>
+                    <group invisible="excel_file">
+                        <group>
+                            <field name="from_date"/>
+                            <field name="to_date"/>
+                        </group>
+                        <group>
+                            <field name="state"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button string="Export Excel" name="action_export_excel" type="object" class="btn-primary" invisible="excel_file"/>
+                        <button string="Close" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- Action الـ Wizard -->
+        <record id="action_prescription_excel_wizard" model="ir.actions.act_window">
+            <field name="name">Export Monthly Report</field>
+            <field name="res_model">prescription.excel.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <!-- Menu Item للـ Wizard -->
+        <menuitem id="menu_prescription_excel_wizard"
+                  name="Export Monthly Report"
+                 parent="Al_Shifa_pharmacy_root_menu"
+                  action="action_prescription_excel_wizard"
+                  sequence="3"/>
+    </data>
+</odoo>

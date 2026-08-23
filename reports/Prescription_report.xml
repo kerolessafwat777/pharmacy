@@ -1,0 +1,99 @@
+<odoo>
+    <record id="property_report_action" model="ir.actions.report">
+
+        <field name="name">Prescription Report</field> <!-- الاسم الذي يظهر للمستخدم في الواجهة داخل
+        قائمة الطباعة -->
+        <field name="model">prescription</field>  <!-- اسم الموديل في قاعدة البيانات المستهدف بالتقرير -->
+        <field name="report_type">qweb-pdf</field> <!--  صيغة مخرج التقرير (ملف PDF مباشر أو صفحة HTML
+        للعرض) القيم المتاحه qweb-Html: -->
+        <field name="binding_model_id" ref="model_prescription" /><!-- يربط التقرير بالموديل لكي يظهر
+        خيار الطباعة في واجهة هذا الموديل -->
+        <field name="binding_type">report</field><!-- يحدد هيظهر في زرار لوحده اسمه طباعه ولا هيظهر
+        في الترس-->
+        <field name="report_name">Al_Shifa_pharmacy.prescription_report_template</field>  <!-- ربط بالتصميم  ينحط هنا
+        ال id-->
+    </record>
+    <template id="prescription_report_template">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <t t-foreach="docs" t-as="doc">
+                   
+                    <div class="page">
+                        
+                        <!-- عنوان التقرير ورقم الروشتة -->
+                        <div class="row mt-4 mb-4">
+                            <div class="col-12 text-center">
+                                <h2><strong>Prescription Receipt</strong></h2>
+                                <h4><span t-field="doc.name"/></h4>
+                            </div>
+                        </div>
+
+                        <!-- معلومات الروشتة الأساسية (المريض، الدكتور، التاريخ) -->
+                        <div class="row mb-4" style="font-size: 14px;">
+                            <div class="col-6">
+                                <p><strong>Patient Name:</strong> <span t-field="doc.patient_id"/></p>
+                                <p><strong>Doctor Name:</strong> <span t-field="doc.doctor_id"/></p>
+                            </div>
+                            <div class="col-6 text-end">
+                                <p><strong>Date:</strong> <span t-field="doc.date"/></p>
+                            </div>
+                        </div>
+
+                        <!-- جدول الأدوية والمكونات -->
+                        <table class="table table-sm table-bordered mt-3">
+                            <thead>
+                                <tr class="bg-light text-center">
+                                    <th>Medicine</th>
+                                    <th>Lot Number</th>
+                                    <th>Expiry Date</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.line_ids" t-as="line">
+                                    <tr>
+                                        <td><span t-field="line.medicine_id"/></td>
+                                        <td class="text-center"><span t-field="line.lot_id"/></td>
+                                        <td class="text-center"><span t-field="line.expiration_date"/></td>
+                                        <td class="text-center"><span t-field="line.quantity"/></td>
+                                        <td class="text-end"><span t-field="line.price_unit"/></td>
+                                        <td class="text-end"><span t-field="line.price_subtotal"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <!-- الإجمالي الكلي (Grand Total) -->
+                        <div class="row justify-content-end mt-3">
+                            <div class="col-4">
+                                <table class="table table-sm table-borderless">
+                                    <tr class="border-top fw-bold" style="font-size: 16px;">
+                                        <td><strong>Grand Total:</strong></td>
+                                        <td class="text-end">
+                                            <span t-field="doc.total_amount"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- التوقيع واسم الصيدلي في الأسفل -->
+                        <div class="row mt-5 pt-4" style="page-break-inside: avoid;">
+                            <div class="col-6">
+                                <p><strong>Pharmacist Name:</strong> <span t-field="doc.create_uid.name"/></p>
+                            </div>
+                            <div class="col-6 text-end">
+                                <p><strong>Signature:</strong> ________________________</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+
+    </template>
+
+</odoo>

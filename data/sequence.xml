@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- تعريف التسلسل التلقائي -->
+        <record id="Prescription_sequence" model="ir.sequence">
+            <field name="name">Prescription Sequence</field>
+            <field name="code">kero_Prescription</field> 
+            <field name="prefix">PH/</field>
+            <field name="padding">3</field>           
+            <field name="number_next">1</field>        
+            <field name="number_increment">1</field>  
+          
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ======================================================== -->
+    <!-- Clean Form View for Gym Members                          -->
+    <!-- ======================================================== -->
+    <record id="view_partner_form_gym_inherit" model="ir.ui.view">
+        <field name="name">res.partner.form.gym.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            
+            <!-- 1. إخفاء اختيار Individual / Company وجعل القيمة فردية دائمًا -->
+            <xpath expr="//field[@name='company_type']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- 2. إخفاء اسم الشركة ووظيفة العضو ورقم الضريبة -->
+            <xpath expr="//field[@name='parent_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='function']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='vat']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='website']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='title']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- 3. إخفاء التبويبات التجاريّة غير المهمة لمونا -->
+            <xpath expr="//page[@name='contact_addresses']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//page[@name='sales_purchases']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- 4. إضافة حقل مخفي لتمييز عضو الجيم -->
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="is_gym_member" invisible="1"/>
+            </xpath>
+
+            <!-- 5. إظهار بيانات الاشتراك بشكل أنيق وفي مكان واضح -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Gym Subscription" name="gym_subscription" invisible="not is_gym_member">
+                    <group>
+                        <group string="Subscription Details">
+                            <field name="plan_type" required="is_gym_member"/>
+                            <field name="start_date" required="is_gym_member"/>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="view_gym_member_tree" model="ir.ui.view">
+        <field name="name">res.partner.gym.list</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <list string="Gym Members">
+                <field name="name" string="Member Name"/>
+                <field name="phone"/>
+                <field name="plan_type"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="gym_member_view_action" model="ir.actions.act_window">
+        <field name="name">Gym Members</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_gym_member', '=', True)]</field>
+        <field name="context">{'default_is_gym_member': True, 'default_company_type': 'person'}</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_gym_member_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_partner_form_gym_inherit')})]"/>
+    </record>
+
+</odoo>

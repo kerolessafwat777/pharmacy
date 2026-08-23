@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_medicine_cashier,medicine.cashier,model_product_template,group_pharmacy_cashier,1,0,0,0
+access_prescription_cashier,prescription.cashier,model_prescription,group_pharmacy_cashier,1,0,0,0
+access_prescription_lines_cashier,prescription_lines.cashier,model_prescription_lines,group_pharmacy_cashier,1,0,0,0
+access_medicine_pharmacist,medicine.pharmacist,model_product_template,group_pharmacy_pharmacist,1,1,1,0
+access_prescription_pharmacist,prescription.pharmacist,model_prescription,group_pharmacy_pharmacist,1,1,1,0
+access_prescription_lines_pharmacist,prescription_lines.pharmacist,model_prescription_lines,group_pharmacy_pharmacist,1,1,1,0
+access_medicine_manager,medicine.manager,model_product_template,group_pharmacy_manager,1,1,1,1
+access_prescription_manager,prescription.manager,model_prescription,group_pharmacy_manager,1,1,1,1
+access_prescription_lines_manager,prescription_lines.manager,model_prescription_lines,group_pharmacy_manager,1,1,1,1
+access_prescription_excel_wizard,prescription.excel.wizard,model_prescription_excel_wizard,Al_Shifa_pharmacy.group_pharmacy_manager,1,1,1,1

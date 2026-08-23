@@ -1,0 +1,14 @@
+/* تلوين خلفية الصف باللون الأحمر الخفيف مع جعل النص أسود بالكامل */
+.o_list_renderer .o_list_table tr.text-danger,
+.o_list_renderer .o_list_table tr.text-danger > td {
+    background-color: #f8d7da !important;
+    color: #000000 !important;
+    --table-bg-type: #f8d7da !important;
+}
+
+/* تحويل لون النص والرعايات والأرقام داخل الخلايا للون الأسود */
+.o_list_renderer .o_list_table tr.text-danger td span,
+.o_list_renderer .o_list_table tr.text-danger td a,
+.o_list_renderer .o_list_table tr.text-danger td div {
+    color: #000000 !important;
+}
