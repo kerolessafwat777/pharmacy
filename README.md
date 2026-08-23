@@ -1,214 +1,210 @@
-Al-Shifa Pharmacy Management System
+# Al Shifa Pharmacy Management System
 
-A custom Odoo 18 Community Edition module for managing pharmacy operations, including medicine inventory, doctor prescriptions, and prescription-to-sale workflows.
+An Odoo 18 (Community Edition) module for managing a pharmacy's medicines, prescriptions, and related sales operations.
 
-Overview
+## Overview
 
-Al-Shifa Pharmacy Management System (declared in the manifest as Pharmacy_Management_System) is an Odoo 18 application module that extends Odoo's Product, Stock, and Sales apps to support pharmacy-specific operations.
+Al Shifa Pharmacy is a custom Odoo module that extends the standard Product, Stock, and Sales apps to handle pharmacy-specific workflows. It allows a pharmacy to:
 
-The module solves the problem of tracking medicines as a distinct product category (with prescription requirements and minimum stock thresholds) and formalizing the prescription lifecycle — from a doctor's prescription, through pharmacist confirmation, to delivery and automatic conversion into a Sales Order that deducts stock.
+- Mark products as medicines and track prescription requirements and minimum stock levels.
+- Record patient prescriptions with line items, and convert confirmed prescriptions into sale orders that automatically deduct stock.
+- Export prescription data to Excel for reporting.
+- Print prescriptions as PDF reports.
+- Control access with role-based security (Cashier, Pharmacist, Manager).
 
-It is designed for pharmacy staff operating with three levels of responsibility — Cashier, Pharmacist, and Manager — each with different levels of access to medicine and prescription records.
+It is intended for small to medium pharmacies that need lightweight prescription and medicine tracking on top of Odoo's existing inventory and sales functionality.
 
-Features
-Medicine Management
-Extends product.template with pharmacy-specific fields: whether a product is a medicine, whether it requires a prescription, and a minimum stock quantity.
-Automatic low-stock flag computed from available quantity vs. the configured minimum.
-Validation to prevent a negative minimum stock quantity.
-Validation to prevent setting an expiration date in the past.
-Prescription Management
-Dedicated prescription model with patient, doctor, date, and status (Draft → Confirmed → Delivered) tracked via mail.thread / mail.activity.mixin (chatter and activity tracking).
-Prescription lines (prescription.lines) capturing medicine, batch number, quantity, and unit price, with an automatically computed subtotal.
-Automatic sequence-based reference numbering for new prescriptions.
-Auto-fill of the unit price from the product's sales price when a medicine is selected on a line.
-Automatically computed grand total from all prescription lines.
-Sales Integration
-On delivery, a prescription automatically generates and confirms a sale.order (one order line per prescription line), linking the created sale order back to the prescription and triggering stock deduction through the standard Odoo sales/stock flow.
-Reporting
-A QWeb PDF report ("Prescription Report") printable directly from the Prescription form, showing patient/doctor details, prescribed medicines, quantities, prices, subtotals, grand total, and a pharmacist signature block.
-Excel Export Wizard
-A transient wizard (prescription.excel.wizard) to export prescriptions within a date range to an .xlsx file using xlsxwriter, with an optional filter by status (All / Confirmed / Delivered). The generated file is offered as a downloadable binary attachment inside the wizard.
-Security
-Three-tier group hierarchy (Cashier → Pharmacist → Manager) with cumulative permissions via implied_ids.
-Access Control List (ir.model.access.csv) defining per-group CRUD permissions on medicines, prescriptions, prescription lines, and the export wizard.
-Record rules restricting pharmacists to prescriptions they created, while managers can see all records.
-Menus
-A dedicated top-level "Al Shifa pharmacy" menu with entries for Prescriptions and the Export Monthly Report wizard.
+## Features
 
-Note: The module also ships a view file (views/medicine_view.xml) that, despite its name, currently implements a Gym Member form/list/action on res.partner (with fields such as is_gym_member, plan_type, start_date, end_date). This does not correspond to any medicine-related feature in the current codebase and appears to be unrelated/leftover content rather than part of the pharmacy functionality described above.
+**Medicine Management**
+- Flag any product as a medicine (`is_medicine`).
+- Mark whether a medicine requires a prescription (`requires_prescription`).
+- Define a minimum stock quantity per product and automatically compute a low-stock flag.
+- Validation to prevent negative minimum stock quantities and expiration dates set in the past.
 
-Technologies
-Odoo 18 Community Edition
-Python 3 (Odoo ORM, api.depends, api.constrains, api.model_create_multi)
-XML (views, actions, menus, security, QWeb report template)
-PostgreSQL (Odoo's default database backend)
-QWeb (PDF report template, web.external_layout)
-xlsxwriter (Python library used for Excel export in the wizard)
-Project Structure
-text
+**Prescription Management**
+- Create prescriptions linked to a patient and (optionally) a doctor, both `res.partner` records.
+- Add multiple prescription lines, each with a medicine, batch number, quantity, and unit price.
+- Automatic subtotal and grand total computation.
+- Prescription status workflow: Draft → Confirmed → Delivered.
+- On delivery, automatically creates and confirms a linked Sale Order to deduct stock.
+- Auto-generated sequential prescription reference numbers.
+- Chatter/activity tracking (via `mail.thread` and `mail.activity.mixin`).
+
+**Reporting**
+- QWeb PDF report for individual prescriptions.
+- Excel export wizard to export prescriptions filtered by date range and status (All / Confirmed / Delivered).
+
+**Security**
+- Three access levels: Cashier (read-only), Pharmacist (read/write/create), and Manager (full access, including delete).
+- Record rule restricting Pharmacists to prescriptions they created; Managers can see all prescriptions.
+
+## Technologies
+
+- Odoo 18 (Community Edition)
+- Python
+- XML (views, reports, security)
+- QWeb (PDF reports)
+- PostgreSQL (Odoo's default database)
+- `xlsxwriter` (Python library used for Excel export)
+
+## Project Structure
+
+```text
 Al_Shifa_pharmacy/
 ├── models/
-│   ├── __init__.py
-│   ├── medicine.py                 # product.template extension (medicine fields, validations)
-│   └── Prescription.py             # prescription and prescription.lines models
+│   ├── medicine.py                  # Extends product.template with pharmacy fields
+│   ├── Prescription.py              # Prescription and prescription line models
+│   └── __init__.py
 ├── wizards/
-│   ├── __init__.py
-│   └── prescription_excel_wizard.py  # Excel export TransientModel
+│   ├── prescription_excel_wizard.py # Excel export wizard
+│   ├── prescription_excel_wizard_view.xml
+│   └── __init__.py
 ├── views/
 │   ├── base_menu.xml                # Root application menu
-│   ├── medicine_view.xml            # res.partner (gym member) view — see note above
-│   └── Prescription_view.xml        # Prescription form/list views, action, menu item
-├── wizards/
-│   └── prescription_excel_wizard_view.xml  # Wizard form view, action, menu item
+│   ├── medicine_view.xml            # Product/medicine related views
+│   └── Prescription_view.xml        # Prescription views (form, list, actions)
 ├── reports/
-│   └── Prescription_report.xml      # QWeb PDF report action + template
+│   └── Prescription_report.xml      # QWeb PDF report for prescriptions
 ├── security/
-│   ├── pharmacy_security.xml        # Module category and user groups
-│   ├── ir.model.access.csv          # Access Control List
+│   ├── pharmacy_security.xml        # User groups (Cashier, Pharmacist, Manager)
+│   ├── ir.model.access.csv          # Model-level access rights
 │   └── pharmacy_rules.xml           # Record rules
-├── static/
-│   └── src/css/style.css            # Backend CSS asset
+├── data/
+│   └── sequence.xml                 # Sequence for prescription references
+├── static/src/css/style.css         # Backend styling asset
 ├── __init__.py
 └── __manifest__.py
-Installation
-Requirements
-Odoo 18 Community Edition installed and running.
-Python 3 with the packages required by your Odoo installation, plus the xlsxwriter package (required by the Excel export wizard).
-bash
-pip3 install xlsxwriter
-Steps
-Get the module
-Place the module folder (e.g. Al_Shifa_pharmacy) into your Odoo custom addons directory.
-Add the addons path
-Ensure the parent directory containing the module is listed in your odoo.conf:
-ini
-   [options]
-   addons_path = /path/to/odoo/addons, /path/to/custom/addons
-Restart the Odoo service
-bash
-   sudo systemctl restart odoo
+```
 
-or, if running from source:
+## Installation
 
-bash
-   ./odoo-bin -c /etc/odoo/odoo.conf
-Update the Apps List
-In Odoo, activate developer mode, go to Apps, and click Update Apps List.
-Install the module
-Search for Pharmacy_Management_System (or the module's technical name, Al_Shifa_pharmacy) in the Apps list and click Install.
-Configuration
+**Requirements**
+- A running Odoo 18 Community Edition instance.
+- Python dependency: `xlsxwriter` (required for the Excel export wizard).
 
-After installation, an administrator should:
+**Steps**
 
-Assign user groups: Under Settings → Users & Companies → Users, assign each pharmacy staff member to one of the Pharmacy Management groups — Cashier, Pharmacist, or Manager — under the "Pharmacy Management" category. Since group permissions are cumulative (each higher group implies the lower one), assigning Manager also grants Pharmacist and Cashier rights.
-Mark products as medicines: On the Product form (product.template), the Is Medicine? checkbox defaults to enabled for new products; use Requires Prescription and Minimum Stock Quantity to configure pharmacy-specific behavior per product.
-Sequence: The prescription model relies on a sequence (kero_Prescription, defined in data/sequence.xml) for automatic reference numbering — no manual setup is required beyond installation.
-Usage
-Navigate to Al Shifa pharmacy → Prescriptions.
-Create a new prescription, selecting the Patient and, optionally, the Doctor.
-On the Medicines tab, add prescription lines by selecting a medicine (its price auto-fills from the product's sales price), a batch number, and a quantity.
-Click Confirm to move the prescription from Draft to Confirmed.
-Click Deliver to move it to Delivered — this automatically creates and confirms a linked Sale Order, deducting the corresponding stock.
-Use the print button on the prescription form to generate the Prescription Report PDF.
-Go to Al Shifa pharmacy → Export Monthly Report to export prescriptions within a chosen date range (optionally filtered by status) to an Excel file.
-Models
-Model	Technical Name	Purpose
-Prescription	prescription	Header record for a patient prescription (patient, doctor, date, status, total)
-Prescription Line	prescription.lines	Individual medicine line on a prescription (product, batch, quantity, price, subtotal)
-Prescription Excel Wizard	prescription.excel.wizard	Transient wizard to export prescriptions to Excel over a date range
-Medicine (extension)	product.template (inherited)	Adds pharmacy-specific fields to standard products
-Custom Fields
-Field	Model	Type	Description
-is_medicine	product.template	Boolean	Marks the product as a pharmaceutical medicine (defaults to True)
-requires_prescription	product.template	Boolean	Indicates the medicine requires a doctor's prescription
-min_stock_qty	product.template	Float	Minimum stock quantity threshold for the product
-is_low_stock	product.template	Boolean (computed, stored)	True when available quantity is below min_stock_qty
-name	prescription	Char	Auto-generated prescription reference (sequence kero_Prescription)
-patient_id	prescription	Many2one (res.partner)	The patient the prescription is issued for
-doctor_id	prescription	Many2one (res.partner)	The prescribing doctor
-date	prescription	Date	Prescription date
-status	prescription	Selection	Draft / Confirmed / Delivered workflow state
-line_ids	prescription	One2many (prescription.lines)	Medicine lines belonging to the prescription
-total_amount	prescription	Float (computed, stored)	Sum of all line subtotals
-sale_order_id	prescription	Many2one (sale.order)	Sale order generated on delivery
-product_id	prescription.lines	Many2one (product.product)	Medicine dispensed on the line
-batch_number	prescription.lines	Char	Batch/lot number of the dispensed medicine
-quantity	prescription.lines	Float	Quantity dispensed
-price_unit	prescription.lines	Float	Unit price (auto-filled from the product's sales price)
-price_subtotal	prescription.lines	Float (computed, stored)	quantity * price_unit
-Security
-Module category: Pharmacy Management, defined in security/pharmacy_security.xml.
-User groups (cumulative, via implied_ids):
-group_pharmacy_cashier — Cashier: read-only access to medicines, prescriptions, and prescription lines.
-group_pharmacy_pharmacist — Pharmacist: read, write, and create access on medicines, prescriptions, and prescription lines (implies Cashier).
-group_pharmacy_manager — Manager: full CRUD (including delete) on medicines, prescriptions, prescription lines, and the Excel export wizard (implies Pharmacist).
-Access Control List (security/ir.model.access.csv): defines the CRUD permissions above per group and model (product.template, prescription, prescription.lines, prescription.excel.wizard).
-Record rules (security/pharmacy_rules.xml):
-Pharmacists can only read/write/create prescriptions they created themselves (create_uid = user.id); they cannot delete prescriptions.
-Managers have unrestricted access to all prescription records.
-Dependencies
+1. Clone or copy this module into your Odoo custom addons directory:
+   ```bash
+   git clone <repository-url> Al_Shifa_pharmacy
+   ```
+2. Place the `Al_Shifa_pharmacy` folder inside your Odoo addons path (the directory referenced by `addons_path` in your `odoo.conf`).
+3. Install the required Python dependency:
+   ```bash
+   pip install xlsxwriter
+   ```
+4. Restart the Odoo server.
+5. In Odoo, enable Developer Mode, go to **Apps**, and click **Update Apps List**.
+6. Search for **Pharmacy_Management_System** and click **Install**.
 
-Declared in __manifest__.py:
+## Configuration
 
-Module	Reason
-base	Core Odoo framework (users, partners, groups)
-product	Extends product.template with medicine fields
-stock	Provides inventory quantities (qty_available) and expiration-date tracking used for low-stock and expiry validation
-sale_management	Used to automatically generate and confirm a Sale Order when a prescription is delivered
-Business Workflow
-text
-Product Setup (mark as Medicine, set Min Stock Qty)
-      ↓
-Prescription Created (Draft)
-      ↓
-Prescription Confirmed
-      ↓
-Prescription Delivered
-      ↓
-Sale Order Auto-Created & Confirmed
-      ↓
+After installation:
+
+- Go to **Settings → Users & Companies → Groups** (or the Pharmacy module category) and assign users to one of: **Cashier**, **Pharmacist**, or **Manager**.
+- Mark relevant products as medicines from the Product form (`is_medicine`, `requires_prescription`, `min_stock_qty`).
+- Ensure Sales (`sale_management`) and Inventory (`stock`) apps are properly configured (warehouses, units of measure) since prescription delivery generates real sale orders.
+
+## Usage
+
+1. Create or edit a product and mark it as a medicine, setting whether it requires a prescription and its minimum stock quantity.
+2. Open the **Al Shifa Pharmacy** menu and create a new **Prescription**, selecting a patient and optionally a doctor.
+3. Add one or more prescription lines with medicine, batch number, and quantity.
+4. Confirm the prescription (Draft → Confirmed).
+5. Mark it as **Delivered** — this automatically creates and confirms a Sale Order, deducting the medicines from stock.
+6. Print the prescription as a PDF report, or use the **Export to Excel** wizard to download prescriptions for a given date range and status.
+
+## Models
+
+| Model                       | Technical Name             | Purpose                                             |
+|------------------------------|-----------------------------|------------------------------------------------------|
+| Product Template (extended)  | `product.template`          | Adds medicine-specific fields to products            |
+| Prescription                 | `prescription`               | Stores prescription header data                      |
+| Prescription Line             | `prescription.lines`         | Stores individual medicine lines of a prescription    |
+| Prescription Excel Wizard     | `prescription.excel.wizard`  | Transient model used to export prescriptions to Excel |
+
+## Custom Fields
+
+| Field                  | Model                | Type     | Description                                             |
+|-------------------------|-----------------------|----------|-----------------------------------------------------------|
+| `is_medicine`            | `product.template`    | Boolean  | Marks a product as a pharmaceutical medicine               |
+| `requires_prescription`  | `product.template`    | Boolean  | Marks whether the medicine requires a doctor's prescription |
+| `min_stock_qty`          | `product.template`    | Float    | Minimum stock quantity threshold                            |
+| `is_low_stock`           | `product.template`    | Boolean (computed) | True when available quantity is below `min_stock_qty` |
+| `name`                   | `prescription`        | Char     | Auto-generated prescription reference                       |
+| `patient_id`             | `prescription`        | Many2one (`res.partner`) | The patient the prescription is for              |
+| `doctor_id`               | `prescription`        | Many2one (`res.partner`) | The prescribing doctor                            |
+| `status`                  | `prescription`        | Selection | Workflow state: Draft, Confirmed, Delivered                 |
+| `total_amount`            | `prescription`        | Float (computed) | Sum of all prescription line subtotals               |
+| `sale_order_id`           | `prescription`        | Many2one (`sale.order`) | Sale order generated on delivery                  |
+| `product_id`              | `prescription.lines`  | Many2one (`product.product`) | The prescribed medicine                     |
+| `batch_number`            | `prescription.lines`  | Char     | Batch/lot number of the dispensed medicine                  |
+| `quantity`                 | `prescription.lines`  | Float    | Quantity of medicine prescribed                              |
+| `price_unit`               | `prescription.lines`  | Float    | Unit price, auto-filled from the product's sales price       |
+| `price_subtotal`           | `prescription.lines`  | Float (computed) | Line subtotal (quantity × price_unit)               |
+
+## Security
+
+- **User Groups** (`security/pharmacy_security.xml`): Cashier, Pharmacist (implies Cashier), and Manager (implies Pharmacist), grouped under a "Pharmacy Management" category.
+- **Access Rights** (`security/ir.model.access.csv`): Cashiers have read-only access to medicines and prescriptions; Pharmacists have read/write/create access; Managers have full access including deletion. The Excel export wizard is restricted to Managers.
+- **Record Rules** (`security/pharmacy_rules.xml`): Pharmacists can only read/write prescriptions they personally created; Managers can view and manage all prescriptions.
+
+## Dependencies
+
+Declared in `__manifest__.py`:
+
+- `base` – core Odoo framework.
+- `product` – underlying product/template model extended for medicines.
+- `stock` – inventory management, used for stock quantities and low-stock computation.
+- `sale_management` – used to generate sale orders when a prescription is delivered.
+
+## Business Workflow
+
+```text
+Product Setup (mark as medicine)
+        ↓
+Prescription Creation (Draft)
+        ↓
+Prescription Confirmation
+        ↓
+Prescription Delivery
+        ↓
+Sale Order Created & Confirmed
+        ↓
 Stock Deducted
-      ↓
-Prescription Report / Excel Export
-Screenshots
-Main Dashboard
+```
 
-Show Image
+## Screenshots
 
-Prescription Form
+### Prescription Form
+![Prescription Form](docs/screenshots/prescription-form.png)
 
-Show Image
+### Excel Export Wizard
+![Excel Export Wizard](docs/screenshots/excel-export-wizard.png)
 
-Prescription Report
+## Development
 
-Show Image
+- **Odoo Version:** 18 Community Edition.
+- **Module structure** follows the standard Odoo layout (`models`, `views`, `wizards`, `reports`, `security`, `data`, `static`).
+- When adding new fields or models, remember to update `security/ir.model.access.csv` and, if needed, `security/pharmacy_rules.xml`.
+- The Excel wizard relies on the `xlsxwriter` Python package — ensure it is installed in the Odoo Python environment.
 
-Development
-Odoo version: 18 Community Edition (uses Odoo 18 syntax, e.g. <list> views and invisible="condition" attribute expressions).
-Python version: Not explicitly pinned in the module; should match the Python version required by your Odoo 18 installation.
-Module layout: Standard Odoo addon layout — models/, wizards/, views/, reports/, security/, static/.
-Development considerations:
-The prescription.excel.wizard requires the xlsxwriter Python package to be available in the Odoo environment.
-The QWeb report template (Prescription_report.xml) references line.medicine_id, line.lot_id, and line.expiration_date on prescription lines; the current prescription.lines model instead defines product_id and batch_number. This mismatch should be reviewed before relying on the printed report in production.
-views/medicine_view.xml currently contains gym-member-related view definitions unrelated to the medicine features described in this README (see note in the Features section).
-Testing
+## Testing
 
-No automated tests are currently included in this module.
+Automated tests are not currently included in this module.
 
-Troubleshooting
-Module fails to install / update: Verify that xlsxwriter is installed in the Python environment used by the Odoo server, since it is imported directly in wizards/prescription_excel_wizard.py.
-Prescription Report shows blank/errored fields: The report template references fields (medicine_id, lot_id, expiration_date) that are not defined on the prescription.lines model in this version of the code; align the template with the actual line fields (product_id, batch_number) if this occurs.
-"Expiration date" validation errors on products: medicine.py validates an expiration_date field on product.template; ensure the module providing this field (if any, beyond stock) is installed, or confirm the field is available in your Odoo 18 setup before creating/importing medicines with expiry data.
-Users cannot see the Pharmacy menu or records: Confirm the user has been assigned to at least the Cashier group under the "Pharmacy Management" category in Settings → Users.
-Contributing
+## Troubleshooting
 
-Contributions are welcome. Please fork the repository, create a feature branch, and submit a pull request describing your changes. For significant changes, open an issue first to discuss what you would like to modify.
+- **Module not visible in Apps list:** Make sure Developer Mode is enabled and click **Update Apps List** before searching for the module.
+- **Excel export fails:** Confirm that the `xlsxwriter` Python package is installed in the same environment running the Odoo server.
+- **Sale order not created on delivery:** This only happens if the prescription has at least one line and does not already have a linked sale order; verify prescription lines exist before marking it as Delivered.
 
-License
+## Contributing
 
-No license has been specified yet.
+Contributions are welcome. Please open an issue to discuss any significant change before submitting a pull request, and keep new features consistent with the existing module structure and Odoo 18 conventions.
 
-Author
+## License
 
-keroles software
-Website: www.t-keroles.com
+> No license has been specified yet.
+
