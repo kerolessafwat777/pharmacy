@@ -1,0 +1,14 @@
+.o_list_view {
+    width: 100%;
+    padding: 16px;
+}
+
+.o_list_view .o_list_table {
+    border-collapse: separate;
+    margin-bottom: 0;
+}
+
+.o_list_view th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}

@@ -1,0 +1,28 @@
+<odoo>
+    <data>
+    
+        <record id="medicine_product_1" model="product.template">
+            <field name="name">cetal Extra 1</field>
+            <field name="is_medicine">True</field>
+            <field name="requires_prescription">False</field>
+            <field name="min_stock_qty">10.0</field>
+            <field name="list_price">35.0</field>
+        </record>
+        <record id="medicine_product_2" model="product.template">
+            <field name="name">cetal Extra2</field>
+            <field name="is_medicine">True</field>
+            <field name="requires_prescription">False</field>
+            <field name="min_stock_qty">10.0</field>
+            <field name="list_price">35.0</field>
+        </record>
+        <record id="medicine_product_3" model="product.template">
+            <field name="name">cetal Extra 3</field>
+            <field name="is_medicine">True</field>
+            <field name="requires_prescription">False</field>
+            <field name="min_stock_qty">10.0</field>
+            <field name="list_price">35.0</field>
+        </record>
+
+
+    </data>
+</odoo>

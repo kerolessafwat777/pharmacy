@@ -1,91 +1,93 @@
-<?xml version="1.0" encoding="utf-8"?>
+
 <odoo>
-
-    <!-- ======================================================== -->
-    <!-- Clean Form View for Gym Members                          -->
-    <!-- ======================================================== -->
-    <record id="view_partner_form_gym_inherit" model="ir.ui.view">
-        <field name="name">res.partner.form.gym.inherit</field>
-        <field name="model">res.partner</field>
-        <field name="inherit_id" ref="base.view_partner_form"/>
+<data >
+        <!-- 1. Form View -->
+    <record id="product_template_form_view_pharmacy" model="ir.ui.view">
+        <field name="name">product.template.form.pharmacy</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
         <field name="arch" type="xml">
-            
-            <!-- 1. إخفاء اختيار Individual / Company وجعل القيمة فردية دائمًا -->
-            <xpath expr="//field[@name='company_type']" position="attributes">
-                <attribute name="invisible">1</attribute>
-            </xpath>
+            <xpath expr="//div[hasclass('oe_title')]" position="before">
+                <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+               
+                <widget name="web_ribbon" title="Low Stock" bg_color="text-bg-danger" invisible="not is_low_stock"/>
 
-            <!-- 2. إخفاء اسم الشركة ووظيفة العضو ورقم الضريبة -->
-            <xpath expr="//field[@name='parent_id']" position="attributes">
-                <attribute name="invisible">1</attribute>
-            </xpath>
-            <xpath expr="//field[@name='function']" position="attributes">
-                <attribute name="invisible">1</attribute>
-            </xpath>
-            <xpath expr="//field[@name='vat']" position="attributes">
-                <attribute name="invisible">1</attribute>
-            </xpath>
-            <xpath expr="//field[@name='website']" position="attributes">
-                <attribute name="invisible">1</attribute>
-            </xpath>
-            <xpath expr="//field[@name='title']" position="attributes">
-                <attribute name="invisible">1</attribute>
-            </xpath>
 
-            <!-- 3. إخفاء التبويبات التجاريّة غير المهمة لمونا -->
-            <xpath expr="//page[@name='contact_addresses']" position="attributes">
-                <attribute name="invisible">1</attribute>
+        </xpath>
+            <xpath expr="//div[hasclass('oe_title')]" position="after">
+                <group>
+                    <field name="is_medicine"/>
+                </group>
             </xpath>
-            <xpath expr="//page[@name='sales_purchases']" position="attributes">
-                <attribute name="invisible">1</attribute>
-            </xpath>
-
-            <!-- 4. إضافة حقل مخفي لتمييز عضو الجيم -->
-            <xpath expr="//field[@name='category_id']" position="after">
-                <field name="is_gym_member" invisible="1"/>
-            </xpath>
-
-            <!-- 5. إظهار بيانات الاشتراك بشكل أنيق وفي مكان واضح -->
             <xpath expr="//notebook" position="inside">
-                <page string="Gym Subscription" name="gym_subscription" invisible="not is_gym_member">
+                <page string="Pharmacy Information"
+                      name="pharmacy_info" invisible="not is_medicine">
                     <group>
-                        <group string="Subscription Details">
-                            <field name="plan_type" required="is_gym_member"/>
-                            <field name="start_date" required="is_gym_member"/>
-                            <field name="end_date"/>
-                        </group>
+                        <field name="requires_prescription"/>
+                        <field name="min_stock_qty"/>
                     </group>
                 </page>
             </xpath>
-
         </field>
     </record>
-
-    <!-- Tree View -->
-    <record id="view_gym_member_tree" model="ir.ui.view">
-        <field name="name">res.partner.gym.list</field>
-        <field name="model">res.partner</field>
+ 
+    <!-- 2. Custom List View with Red Highlight for Low Stock -->
+    <record id="product_template_list_view_pharmacy" model="ir.ui.view">
+        <field name="name">product.template.list.pharmacy</field>
+        <field name="model">product.template</field>
         <field name="arch" type="xml">
-            <list string="Gym Members">
-                <field name="name" string="Member Name"/>
-                <field name="phone"/>
-                <field name="plan_type"/>
-                <field name="start_date"/>
-                <field name="end_date"/>
+            <list string="Medicines" decoration-danger="is_low_stock">
+
+                <field name="name" string="Medicine Name"/>
+                <field name="categ_id" string="Category"/>
+                <field name="qty_available" string="Current Stock"/>
+                <field name="min_stock_qty" string="Minimum Stock"/>
+                <field name="requires_prescription"/>
+                <field name="is_low_stock" column_invisible="1"/>
             </list>
         </field>
     </record>
-
-    <!-- Action -->
-    <record id="gym_member_view_action" model="ir.actions.act_window">
-        <field name="name">Gym Members</field>
-        <field name="res_model">res.partner</field>
+ 
+    <!-- 3. Search View -->
+    <record id="product_template_view_search" model="ir.ui.view">
+        <field name="name">product.template.search.pharmacy</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <filter name="is_low" string="Low Stock" domain="[('is_low_stock', '=', True)]"/>
+                <filter name="requires_prescription" string="Requires Prescription" domain="[('requires_prescription', '=', True)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_category" string="Category" context="{'group_by': 'categ_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+ 
+    <!-- 4. Window Action (Connected to Views) -->
+    <record id="medicine_view_action" model="ir.actions.act_window">
+        <field name="name">Medicines</field>
+        <field name="res_model">product.template</field>
         <field name="view_mode">list,form</field>
-        <field name="domain">[('is_gym_member', '=', True)]</field>
-        <field name="context">{'default_is_gym_member': True, 'default_company_type': 'person'}</field>
+        <field name="domain">[('is_medicine', '=', True)]</field>
+        <field name="context">{'default_is_medicine': True}</field>
+        <field name="search_view_id" ref="product_template_view_search"/>
         <field name="view_ids" eval="[(5, 0, 0),
-            (0, 0, {'view_mode': 'list', 'view_id': ref('view_gym_member_tree')}),
-            (0, 0, {'view_mode': 'form', 'view_id': ref('view_partner_form_gym_inherit')})]"/>
+            (0, 0, {'view_mode': 'list', 'view_id': ref('product_template_list_view_pharmacy')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('product_template_form_view_pharmacy')})]"/>
+    </record>
+    <record id="ListViewAction" model="ir.actions.client">
+        <field name="name">medicine list view</field>
+        <field name="tag">Al_Shifa_pharmacy_tag</field>
+
     </record>
 
+    <menuitem id="medicine_menu_view"
+              name="Medicines"
+              action="medicine_view_action"
+               parent="Al_Shifa_pharmacy_root_menu"
+              sequence="1"/>
+</data>
+  
 </odoo>

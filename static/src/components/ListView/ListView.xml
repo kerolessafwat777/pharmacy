@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="Al_Shifa_pharmacy.action_list_view" owl="1">
+        <div class="o_content overflow-auto p-3" style="height: 100vh;">
+            <div class="mb-3">
+                <button class="btn btn-primary" t-on-click="toggleCreateForm">
+                    <i class="fa fa-plus me-1"/> 
+                    <t t-if="state.showCreateForm">Close</t>
+                    <t t-else="">New</t>
+
+                </button>
+                <t t-if="state.showCreateForm">
+                    <FormView/>
+                </t>
+            </div>
+            <table class="table table-hover table-striped o_list_table">
+                <thead>
+                    <tr>
+                        <th>Medicine Name</th>
+                        <th>Current Stock</th>
+                        <th>Price</th>
+                        <th class="text-center">Actions</th>
+                        <th>UpDate</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="state.records" t-as="record" t-key="record.id">
+                        <tr>
+                            <td><t t-out="record.name"/></td>
+                            <td><t t-out="record.qty_available"/></td>
+                            <td><t t-out="record.list_price"/></td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-danger" t-on-click="() => this.deleteRecord(record.id)">
+                                    <i class="fa fa-trash me-1"/> Delete
+                                </button>
+                            </td>
+                                <td class="text-center">
+                                <button class="btn btn-sm btn-danger" t-on-click="openUpdateDialog">
+                                    <i class="fa fa-trash me-1"/> UpDate
+                                </button>
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+        </div>
+    </t>
+</templates>

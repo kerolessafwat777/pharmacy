@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="Al_Shifa_pharmacy.action_formView" owl="1">
+     <div class="p-3">
+        <div class="mb-3">
+            <label>Name</label>
+            <input t-model="state.name" placeholder="Enter Medicine Name"/>
+            <label>quantity available</label>
+            <input t-model="state.qty_available" placeholder="Enter Medicine qty_available"/>
+            <label>is medicine?</label>
+            <input t-model="state.is_medicine" placeholder="Enter Medicine is_medicine"/>
+        </div>
+        
+      <div class="footer">
+        
+            <button class="btn btn-primary" t-on-click="createRecord">Save</button>
+            <button class="btn btn-secondary ms-2" t-on-click="cancel">Cancel</button>
+      </div>
+      
+
+        
+     </div>
+    </t>
+</templates>

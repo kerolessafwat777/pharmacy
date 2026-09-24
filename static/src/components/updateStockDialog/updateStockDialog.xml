@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="Al_Shifa_pharmacy.action_popUpView" owl="1">
+        <Dialog title="'Update Stock - ' + props.productName" size="'md'">
+            <div class="p-3">
+                <div class="mb-3">
+                    <label>Lot Name</label>
+                    <input type="text" class="form-control" t-model="state.lot_Name" placeholder="Enter Lot Name"/>
+                </div>
+                <div class="mb-3">
+                    <label>New Purchased Quantity</label>
+                    <input type="number" class="form-control" t-model="state.new_purchased_qty" placeholder="Enter New Purchased Quantity"/>
+                </div>
+                <div class="mb-3">
+                    <label>Expiration Date of the Lot</label>
+                    <input type="date" class="form-control" t-model="state.expiration_date"/>
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="ADD_Quantity">Add Quantity</button>
+                <button class="btn btn-secondary ms-2" t-on-click="cancel">Cancel</button>
+            </t>
+        </Dialog>
+    </t>
+</templates>
